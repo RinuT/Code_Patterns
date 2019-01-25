@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!-- Template by html.am -->
+<html>
+	<head>
+		<!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> -->
+		<title>MyTravels Booking Site</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link href="../css/bootstrap.min.css" rel="stylesheet">
+		<link href="../css/style.css" rel="stylesheet">	
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+	<body class="manufacturer_wrapper">
+		<header id="header">
+			<div id="header-inner">	
+				<div id="logo">
+					<h1><a href="#"><img src="./Imgs/Provider.png" alt="ProviderImages" style="width:80px;height:80px;">Flight Information<span>Provider</span></a></h1>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+		</header>
+	<div class="right_content_block col-md-9">
+		<h2>Current Flight Information</h2>
+		<form>
+			<span class="fields_design col-md-6">
+				<label>Flight Service Provider ID</label>
+				<input type="text" id="flightServiceProvider"/>
+			</span>
+			<span class="fields_design col-md-6">
+				<label>Flight Number</label>
+				<input type="text" id="flightNumber"/>
+			</span>
+			<span class="fields_design col-md-6">
+				<label>Current Flight Timestamp</label>
+				<input type="text" id="curFligthTimestamp"/>
+			</span>
+			
+			<span class="fields_design col-md-6">
+					<label>Flight Remarks</label>
+					<input type="text" id="flightRemarks"/>
+				</span>
+			<span class="fields_design col-md-6">
+				<label>Flight Status</label>
+				<select id="flightStatus">
+					<option value="START">Started</option>
+					<option value="IN_PROGRESS">In Progress</option>
+					<option value="DELAYED">Delayed</option>
+					<option value="COMPLETED">Completed</option>
+				</select>
+			</span>
+			<div class="submit_block">
+					<input type="button" value="Submit" class="submit_btn_cmn" onclick="SubmitFlightInfo()"/>
+			</div>
+			<!--<tr>
+				<td colspan='2'></td><div id="result"></div>
+			</tr> -->
+			</form>
+			<div class="clearfix"></div>
+		</div>
+		
+			<div id="footerblurb">
+				<div id="footerblurb-inner">
+				
+					<div class="clr"></div>
+				</div>
+			</div>
+	</body>
+
+	<script type="text/javascript">
+		function SubmitFlightInfo() {
+			console.log("inside function")
+			var flightServiceProvider = document.getElementById("flightServiceProvider").value;
+			var flightNumber = document.getElementById("flightNumber").value;
+			var curFligthTimestamp = document.getElementById("curFligthTimestamp").value;
+			var flightStatus = document.getElementById("flightStatus").value;
+			var flightRemarks = document.getElementById("flightRemarks").value;
+			
+			
+			URL = "http://ec2-52-91-0-32.compute-1.amazonaws.com:3000/api/FlightInfo";
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.open("POST", URL, true);
+			xmlhttp.setRequestHeader("Content-Type", "application/json");
+			xmlhttp.setRequestHeader("charset", "UTF-8");
+			
+			xmlhttp.onreadystatechange = function () {
+				if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+					var json = JSON.parse(xmlhttp.responseText);
+					alert("Flight Information UpdatedSuccessfully");
+				} else if(xmlhttp.readyState ===4 && xmlhttp.status != 200) {
+					alert("Error while trying to Update Flight Information");
+				}
+			};
+			
+			var ItemJSON = JSON.stringify({
+				"$class": "org.cts.travelinsurance.poc.FlightInfo", 
+				"flightProvider": "resource:org.cts.travelinsurance.poc.FlightInfoServiceProvider#"+flightServiceProvider, 
+				"FlightNum": flightNumber, 
+				"curFlightTimestamp": curFligthTimestamp,
+				"FlightStatus": flightStatus,
+				"FlightRemarks": flightRemarks
+				});
+			//alert(ItemJSON);
+			xmlhttp.send(ItemJSON);
+
+			
+		}
+	</script>
+</html>

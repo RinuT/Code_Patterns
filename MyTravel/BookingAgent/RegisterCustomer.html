@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!-- Template by html.am -->
+<html>
+	<head>
+		<!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> -->
+		<title>MyTravels Booking Site</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link href="../css/bootstrap.min.css" rel="stylesheet">
+		<link href="../css/style.css" rel="stylesheet">	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	
+	<body class="manufacturer_wrapper">
+		
+			<header id="header">
+				<div id="header-inner">	
+					<div id="logo">
+						<h1><a href="#"><img src="./Imgs/Logo.png" alt="TravelImage" style="width:80px;height:80px;">My<span>Travels</span></a></h1>
+					</div>
+				</div>
+			</header>
+			<div class="clearfix"></div>
+			<div class="right_content_block col-md-9">
+							<h2>Register Customer</h2>
+							<form>
+								<span class="fields_design col-md-6">
+									<label>Customer ID</label>
+									<input type="text" id="customerID"/>
+								</span>
+								<span class="fields_design col-md-6">
+									<label>Customer Name</label>
+									<input type="text" id="customerName"/>
+								</span>
+								<span class="fields_design col-md-6">
+									<label>EmailID</label>
+									<input type="text" id="emailID"/>
+								</span>
+								<span class="fields_design col-md-6">
+									<label>Bank Account Number</label>
+									<input type="text" id="bankAccountNumber"/>
+								</span>
+								<div class="submit_block">
+										<input type="button" value="Submit" class="submit_btn_cmn" onclick="CreateCustomer()"/>
+									</div>
+							</form>
+						
+				
+			</div>
+		
+			<div id="footerblurb">
+				<div id="footerblurb-inner">
+				
+						<div class="clearfix"></div>
+				</div>
+			</div>
+	</body>
+
+
+
+		
+		
+	<script type="text/javascript">
+		function CreateCustomer() {
+			var customerID = document.getElementById("customerID").value;
+			var customerName = document.getElementById("customerName").value;
+			var emailID = document.getElementById("emailID").value;
+			var bankAccountNumber = document.getElementById("bankAccountNumber").value;
+			var amountPayBack = 0;
+			
+			URL = "http://ec2-52-91-0-32.compute-1.amazonaws.com:3000/api/CustomerObject";
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.open("POST", URL, true);
+			xmlhttp.setRequestHeader("Content-Type", "application/json");
+			xmlhttp.setRequestHeader("charset", "UTF-8");
+			
+			xmlhttp.onreadystatechange = function () {
+				if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+					var json = JSON.parse(xmlhttp.responseText);
+					alert("Customer  Created Successfully");
+				} else if(xmlhttp.readyState ===4 && xmlhttp.status != 200) {
+					alert("Error while trying to create customer");
+				}
+			};
+			
+			var ItemJSON = JSON.stringify({
+				"$class": "org.cts.travelinsurance.poc.CustomerObject", 
+				"CustomerID": customerID,
+				"Email": emailID, 
+				"CustomerName": customerName,
+				"BankAccountNumber": bankAccountNumber,
+				"AmountPayBack": amountPayBack
+				});
+			//alert(ItemJSON);
+			xmlhttp.send(ItemJSON);
+		}
+	</script>
+</html>

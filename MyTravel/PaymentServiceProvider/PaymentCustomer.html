@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<!-- Template by html.am -->
+<html>
+	<head>
+		<!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> -->
+		<title>Payment Service Provider</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link href="../css/bootstrap.min.css" rel="stylesheet">
+		<link href="../css/style.css" rel="stylesheet">	
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+	<body class="manufacturer_wrapper" onload="onLoad()">
+		<header id="header">
+			<div id="header-inner">	
+				<div id="logo">
+				<h1><a href="#"><img src="./Imgs/Money.jpg" alt="PaymentImages" style="width:80px;height:80px;">Payment Service<span>Provider</span></a></h1>
+				</div>
+			</div>
+			</header>
+			<div class="clearfix"></div>
+			<div class="right_content_block col-md-9">
+				<div id="content-inner">
+					<main id="contentbar">
+						<div class="article">
+							<h2>Customer</h2>
+							<div id="CustomerStatus"> </div>
+						</div>
+					</main>
+					<div class="clearfix"></div>
+				</div>
+			</div>
+		
+			<div id="footerblurb">
+				<div id="footerblurb-inner">
+				
+						<div class="clearfix"></div>
+				</div>
+			</div>
+	</body>
+
+	<script type="text/javascript">
+		function onLoad(){
+			var query = window.location.search.substring(1);
+		   var vars = query.split("&");
+		   var policyNumber;
+		   var customerID;
+		   for (var i=0;i<vars.length;i++) {
+				   var pair = vars[i].split("=");
+				   if(i ==0)
+						policyNumber =pair[1];
+					if(i ==1)
+						customerID =pair[1];
+		   }
+		   //alert(policyNumber + customerID);
+		   GetCustomerInfo(policyNumber, customerID);
+		}
+		function GetCustomerInfo(policyNumber, customerID) {
+			URL = "http://ec2-52-91-0-32.compute-1.amazonaws.com:3000/api/CustomerObject/" +customerID;
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.open("GET", URL, true);
+			xmlhttp.setRequestHeader("Content-Type", "application/json");
+			xmlhttp.setRequestHeader("charset", "UTF-8");
+
+			xmlhttp.setRequestHeader("Cache-Control", "no-cache");
+			xmlhttp.setRequestHeader("Pragma", "no-cache");
+			xmlhttp.setRequestHeader("If-Modified-Since", "Sat, 1 Jan 2000 00:00:00 GMT");
+			var status = document.getElementById("CustomerStatus");
+
+
+			xmlhttp.onreadystatechange = function () {
+				if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+					var json = JSON.parse(xmlhttp.responseText);
+					
+					status.innerHTML = "";
+					if(json.PayBackStatus == "Customer_Notified") {
+						status.innerHTML = "<h1>Selected Customer Information</h1>" +
+						"Customer ID: " + customerID + "<br\>" +
+							"Customer Name: " + json.CustomerName + "<br\>" +
+							"Customer Email: " + json.Email + "<br\>" +
+							"Bank Account Number: " + json.BankAccountNumber + "<br\>" +
+							"Amount Pay Back: " + json.AmountPayBack + "<br\>" +
+							"Pay Back Status: " + json.PayBackStatus + "<br\>" +
+							'<button type="submit" onclick="UpdatePolicy(&quot;'+ policyNumber +'&quot;, &quot;Payment_Initiated&quot;)">Initiate Payment</button>';
+					}
+					else if (json.PayBackStatus == "Payment_Initiated") {
+						status.innerHTML = "<h1>Selected Customer Information</h1>" +
+						"Customer ID: " + customerID + "<br\>" +
+							"Customer Name: " + json.CustomerName + "<br\>" +
+							"Customer Email: " + json.Email + "<br\>" +
+							"Bank Account Number: " + json.BankAccountNumber + "<br\>" +
+							"Amount Pay Back: " + json.AmountPayBack + "<br\>" +
+							"Pay Back Status: " + json.PayBackStatus + "<br\>" +
+							'<button type="submit" onclick="UpdatePolicy(&quot;'+ policyNumber +'&quot;, &quot;Payment_Made&quot;)">Complete Payment</button>';
+					}
+					else {
+						status.innerHTML = "<h1>Selected Customer Information</h1>" +
+						"Customer ID: " + customerID + "<br\>" +
+							"Customer Name: " + json.CustomerName + "<br\>" +
+							"Customer Email: " + json.Email + "<br\>" +
+							"Bank Account Number: " + json.BankAccountNumber + "<br\>" +
+							"Amount Pay Back: " + json.AmountPayBack + "<br\>" +
+							"Pay Back Status: " + json.PayBackStatus + "<br\>";
+					}
+				
+				} else if(xmlhttp.readyState ===4 && xmlhttp.status != 200) {
+					alert("Error while trying to Fetch Customer Information");
+				}
+			};
+			var ItemJSON = null;
+			xmlhttp.send(ItemJSON);
+		}
+		
+		function UpdatePolicy(policyNumber, paymentStatus){
+			URL = "http://ec2-52-91-0-32.compute-1.amazonaws.com:3000/api/UpdatePaymentStatus";
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.open("POST", URL, true);
+			xmlhttp.setRequestHeader("Content-Type", "application/json");
+			xmlhttp.setRequestHeader("charset", "UTF-8");
+			
+			xmlhttp.onreadystatechange = function () {
+				if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+					var json = JSON.parse(xmlhttp.responseText);
+					alert("Payment Status Updated Successfully");
+				} else if(xmlhttp.readyState ===4 && xmlhttp.status != 200) {
+					alert("Error while trying to Update Payment Information");
+				}
+			}
+			
+			var ItemJSON = JSON.stringify({
+								"$class": "org.cts.travelinsurance.poc.UpdatePaymentStatus", 
+								"PolicyID": policyNumber,
+								"PaymentCategory": paymentStatus
+								});
+			
+			xmlhttp.send(ItemJSON)
+		}
+	</script>
+</html>

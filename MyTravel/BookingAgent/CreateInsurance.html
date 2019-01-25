@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<!-- Template by html.am -->
+<html>
+	<head>
+			<!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> -->
+			<title>MyTravels Booking Site</title>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+			<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+			<link href="../css/bootstrap.min.css" rel="stylesheet">
+			<link href="../css/style.css" rel="stylesheet">	
+			<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+	<body class="manufacturer_wrapper" onload="GetMaximunPolicyNumber()">
+			<header id="header">
+				<div id="header-inner">	
+					<div id="logo">
+						<h1><a href="#"><img src="./Imgs/Logo.png" alt="TravelImage" style="width:80px;height:80px;">My<span>Travels</span></a></h1>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+			</header>
+				<div class="right_content_block col-md-9">
+					<h2>Create Insurance</h2>
+					<form>
+						<span class="fields_design col-md-6">
+							<label>Booking Agent ID</label>
+							<input type="text" id="bookingAgentID"/>
+						</span>
+						<span class="fields_design col-md-6">
+							<label>Customer ID</label>
+							<input type="text" id="custID"/>
+						</span>
+						<span class="fields_design col-md-6">
+							<label>Policy Type</label>
+							<input type="text" id="policyType"/>
+						</span>
+						<span class="fields_design col-md-6">
+							<label>PNR Number</label>
+							<input type="text" id="pnr"/>
+						</span>
+						<span class="fields_design col-md-6">
+							<label>Flight Number</label>
+							<input type="text" id="flightNumber"/>
+						</span>
+						<span class="fields_design col-md-6">
+							<label>Starting Flight Time</label>
+							<input type="text" id="startingFlightTimestamp"/>
+						</span>
+						<span class="fields_design col-md-6">
+							<label>Reaching Flight Time</label>
+							<input type="text" id="reachingFlightTimestamp"/>
+						</span>
+						<span class="fields_design col-md-6">
+							<label>Insurance Catalogue Type</label>
+								<select id="insuranceCatalogue">
+								<option value="IF112">High Risk International Flight</option>
+								<option value="DF222">High Risk Domestic Flight</option>
+								<option value="DF221">Domestic Flight</option>
+								<option value="IF111">International Flight</option>
+								</select>
+						</span>
+						<div class="submit_block">
+							<input type="button" value="Submit" class="submit_btn_cmn" onclick="CreateInsurance()"/>
+						</div>
+								<!--<tr>
+									<td colspan='2'><div id="result"></div>
+								</tr> -->
+					</form>
+					
+					<div class="clearfix"></div>
+				</div>
+		
+			<div id="footerblurb">
+				<div id="footerblurb-inner">
+				
+						<div class="clearfix"></div>
+				</div>
+			</div>
+			
+		
+	</body>
+
+	<script type="text/javascript">
+		const PolicyStart = 'IP';
+		var PolicyNumberInit = 0;
+		var totalLength = 8;
+		function GetMaximunPolicyNumber(){
+			//alert("HEre");
+			URL = "http://ec2-52-91-0-32.compute-1.amazonaws.com:3000/api/InsurancePolicy";
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.open("GET", URL, true);
+			xmlhttp.setRequestHeader("Content-Type", "application/json");
+			xmlhttp.setRequestHeader("charset", "UTF-8");
+
+			xmlhttp.setRequestHeader("Cache-Control", "no-cache");
+			xmlhttp.setRequestHeader("Pragma", "no-cache");
+			xmlhttp.setRequestHeader("If-Modified-Since", "Sat, 1 Jan 2000 00:00:00 GMT");
+			
+			xmlhttp.onreadystatechange = function () {
+				if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+					var json = JSON.parse(xmlhttp.responseText);
+					
+					status.innerHTML = "";
+					var maxPolicyNumber=0;
+					for(var i=0; i<json.length; i++ ) {
+						curPolicyNumber = json[i].PolicyNumber;
+						//alert(curPolicyNumber);
+						var number = Number(curPolicyNumber.substring(2, curPolicyNumber.length));
+						if(i==0) {
+							maxPolicyNumber = number;
+							//alert(maxPolicyNumber);
+						}
+						else if(number >= maxPolicyNumber) {
+							maxPolicyNumber = number;
+							//alert(maxPolicyNumber);
+						}
+					}
+					PolicyNumberInit = maxPolicyNumber;
+					alert("Initialization complete.")
+					//alert("PolicyNumberHErer - " + PolicyNumberInit);
+				} else if(xmlhttp.readyState ===4 && xmlhttp.status != 200) {
+					alert("Error while trying to Fetch Customer Information");
+				}
+			};
+			var ItemJSON = null;
+			xmlhttp.send(ItemJSON);
+		}
+		
+		function CreateInsurance() {
+			var bookingAgentID = document.getElementById("bookingAgentID").value;
+			var custID = document.getElementById("custID").value;
+			var policyType = document.getElementById("policyType").value;
+			var strPolicyNumber="";
+			var newPolicyNumber=PolicyNumberInit +1;
+			for(var j=0; j < (totalLength - newPolicyNumber.toString().length); j++) {
+				strPolicyNumber+="0";
+			}
+		
+			//var strPolicyNumber = '0'.repeat(totalLength - (PolicyNumberInit +1).length);
+		
+			var policyNumber = PolicyStart.concat(strPolicyNumber.concat(newPolicyNumber.toString()));
+			
+			var pnr = document.getElementById("pnr").value;
+			var flightNumber = document.getElementById("flightNumber").value;
+			var startingFlightTimestamp = document.getElementById("startingFlightTimestamp").value;
+			var reachingFlightTimestamp = document.getElementById("reachingFlightTimestamp").value;
+			var insuranceCatalogue = document.getElementById("insuranceCatalogue").value;
+			
+			URL = "http://ec2-52-91-0-32.compute-1.amazonaws.com:3000/api/CreateInsurance";
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.open("POST", URL, true);
+			xmlhttp.setRequestHeader("Content-Type", "application/json");
+			xmlhttp.setRequestHeader("charset", "UTF-8");
+			
+			xmlhttp.onreadystatechange = function () {
+				if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+					var json = JSON.parse(xmlhttp.responseText);
+					alert("Insurance Created Successfully");
+					alert("PolicyNumber Created - " + policyNumber);
+				} else if(xmlhttp.readyState ===4 && xmlhttp.status != 200) {
+					alert("Error while trying to create insurance");
+				}
+			};
+			
+			var ItemJSON = JSON.stringify({
+				"$class": "org.cts.travelinsurance.poc.CreateInsurance", 
+				"Agent": "resource:org.cts.travelinsurance.poc.BookingAgent#"+bookingAgentID, "PolicyType": policyType, 
+				"PolicyNumber": policyNumber,
+				"PNR": pnr,
+				"FlightNum": flightNumber,
+				"StartFlightTimestamp": startingFlightTimestamp,
+				"ReachingFlightTimestamp": reachingFlightTimestamp,
+				"Customer": "resource:org.cts.travelinsurance.poc.CustomerObject#" + custID,
+				"Catalogue": "resource:org.cts.travelinsurance.poc.InsuranceCatalogue#" + insuranceCatalogue
+				});
+			//alert(ItemJSON);
+			xmlhttp.send(ItemJSON);
+
+			
+		}
+	</script>
+</html>
